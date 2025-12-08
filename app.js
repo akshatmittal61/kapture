@@ -49,12 +49,18 @@ stopBtn.addEventListener("click", () => {
 saveBtn.addEventListener("click", () => {
 	let a = document.createElement("a");
 	a.href = document.querySelector("video").src;
-	const date = new Date().toLocaleString().replace(/:/g, "-").replaceAll("/", "-").replace("T", "-").replace(", ", "-").split(".")[0];
+	const date = new Date()
+		.toLocaleString()
+		.replace(/:/g, "-")
+		.replaceAll("/", "-")
+		.replace("T", "-")
+		.replace(", ", "-")
+		.split(".")[0];
 	a.download = `kaptured-${date}.webm`;
-  video.pause();
-  video.currentTime = 0;
-  video.src = "";
-  video.style.display = "none";
+	video.pause();
+	video.currentTime = 0;
+	video.src = "";
+	video.style.display = "none";
 	recordBtn.classList.remove("dispn");
 	stopBtn.classList.add("dispn");
 	saveBtn.classList.add("dispn");
