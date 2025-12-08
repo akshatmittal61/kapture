@@ -49,7 +49,8 @@ stopBtn.addEventListener("click", () => {
 saveBtn.addEventListener("click", () => {
 	let a = document.createElement("a");
 	a.href = document.querySelector("video").src;
-	a.download = `screen-recording-${new Date().getTime()}.webm`;
+	const date = new Date().toLocaleString().replace(/:/g, "-").replaceAll("/", "-").replace("T", "-").replace(", ", "-").split(".")[0];
+	a.download = `kaptured-${date}.webm`;
 	video.style.display = "none";
 	recordBtn.classList.remove("dispn");
 	stopBtn.classList.add("dispn");
