@@ -1,5 +1,6 @@
 let isRecording = false;
 let mediaRecorder;
+let fileExtension = "webm";
 
 let recordBtn = document.querySelector(".record-btn");
 let stopBtn = document.querySelector(".stop-btn");
@@ -11,9 +12,14 @@ recordBtn.addEventListener("click", async () => {
 		video: true,
 		audio: true,
 	});
-	const mime = MediaRecorder.isTypeSupported("video/webm; codecs=h264")
-		? "video/webm; codecs=h264"
-		: "video/webm";
+	let mime = "video/webm";
+	if (MediaRecorder.isTypeSupported("video/mp4")) {
+		mime = "video/mp4";
+		fileExtension = "mp4";
+	} else if (MediaRecorder.isTypeSupported("video/webm; codecs=h264")) {
+		mime = "video/webm; codecs=h264";
+		fileExtension = "webm";
+	}
 	mediaRecorder = new MediaRecorder(stream, {
 		mimeType: mime,
 	});
@@ -56,7 +62,7 @@ saveBtn.addEventListener("click", () => {
 		.replace("T", "-")
 		.replace(", ", "-")
 		.split(".")[0];
-	a.download = `kaptured-${date}.webm`;
+	a.download = `kaptured-${date}.${fileExtension}`;
 	video.pause();
 	video.currentTime = 0;
 	video.src = "";
