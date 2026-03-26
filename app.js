@@ -8,10 +8,40 @@ let saveBtn = document.querySelector(".save-btn");
 let video = document.querySelector("video");
 
 recordBtn.addEventListener("click", async () => {
-	let stream = await navigator.mediaDevices.getDisplayMedia({
+	let displayStream = await navigator.mediaDevices.getDisplayMedia({
 		video: true,
 		audio: true,
 	});
+
+	let voiceStream = null;
+	try {
+		voiceStream = await navigator.mediaDevices.getUserMedia({
+			audio: true,
+			video: false,
+		});
+	} catch (e) {
+		console.warn("Microphone not available or permission denied");
+	}
+
+	let audioContext = new AudioContext();
+	let dest = audioContext.createMediaStreamDestination();
+
+	if (displayStream.getAudioTracks().length > 0) {
+		audioContext.createMediaStreamSource(displayStream).connect(dest);
+	}
+	if (voiceStream && voiceStream.getAudioTracks().length > 0) {
+		audioContext.createMediaStreamSource(voiceStream).connect(dest);
+	}
+
+	let stream = new MediaStream([
+		...displayStream.getVideoTracks(),
+		...dest.stream.getAudioTracks(),
+	]);
+
+	let allTracks = [...displayStream.getTracks()];
+	if (voiceStream) {
+		allTracks.push(...voiceStream.getTracks());
+	}
 	let mime = "video/webm";
 	if (MediaRecorder.isTypeSupported("video/mp4")) {
 		mime = "video/mp4";
@@ -29,7 +59,10 @@ recordBtn.addEventListener("click", async () => {
 	});
 	mediaRecorder.addEventListener("stop", () => {
 		isRecording = false;
-		mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+		allTracks.forEach((track) => track.stop());
+		if (audioContext.state !== "closed") {
+			audioContext.close();
+		}
 		let blob = new Blob(chunks, {
 			type: chunks[0].type,
 		});
