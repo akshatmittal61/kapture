@@ -42,6 +42,15 @@ recordBtn.addEventListener("click", async () => {
 	if (voiceStream) {
 		allTracks.push(...voiceStream.getTracks());
 	}
+
+	let autoDownload = false;
+	displayStream.getVideoTracks()[0].addEventListener("ended", () => {
+		if (isRecording) {
+			autoDownload = true;
+			stopBtn.click();
+		}
+	});
+
 	let mime = "video/webm";
 	if (MediaRecorder.isTypeSupported("video/mp4")) {
 		mime = "video/mp4";
@@ -69,8 +78,13 @@ recordBtn.addEventListener("click", async () => {
 		let url = URL.createObjectURL(blob);
 		video.src = url;
 		video.controls = true;
-		video.autoplay = true;
+		video.autoplay = false;
+		video.pause();
 		video.style.display = "block";
+
+		if (autoDownload) {
+			downloadRecording();
+		}
 	});
 	mediaRecorder.start();
 	isRecording = true;
@@ -85,7 +99,7 @@ stopBtn.addEventListener("click", () => {
 	saveBtn.classList.remove("dispn");
 });
 
-saveBtn.addEventListener("click", () => {
+function downloadRecording() {
 	let a = document.createElement("a");
 	a.href = document.querySelector("video").src;
 	const date = new Date()
@@ -104,7 +118,9 @@ saveBtn.addEventListener("click", () => {
 	stopBtn.classList.add("dispn");
 	saveBtn.classList.add("dispn");
 	a.click();
-});
+}
+
+saveBtn.addEventListener("click", downloadRecording);
 
 let a = new Date();
 if (a.getHours() >= 20 || a.getHours() <= 7) {
